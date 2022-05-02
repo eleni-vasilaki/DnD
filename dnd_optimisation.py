@@ -46,19 +46,24 @@ def probability_of__hitting_opponent(opponent_AC,modifiers,advantage,luck_point,
     
     return p_hit
 
-def average_damage(repetitions,average_damage_per_hit,opponent_AC,modifiers,advantage,luck_point,elven_accuracy,hexblade_curse):
+def average_damage(repetitions,average_damage_per_hit,opponent_AC,modifiers,oddbonus,advantage,luck_point,elven_accuracy,hexblade_curse):
     #repetitions and average damage have to be positive. Repetitions must be an integer >0. During checks repetitions get rounded and become 1 if negative value is given. average_damage_per_hit becomes 0 if negative.
 
     #checks
     repetitions=round(repetitions*(repetitions>0)+1*(repetitions<=0))
     average_damage_per_hit=(average_damage_per_hit*(average_damage_per_hit>0))
+    oddbonus=oddbonus*(oddbonus>0)
 
     total_damage=0
     index_repetitions = 1
     p_hit=probability_of__hitting_opponent(opponent_AC,modifiers,advantage,luck_point,elven_accuracy)
     p_crit_hit= probability_of_crtical_hit(advantage,luck_point,elven_accuracy,hexblade_curse)
+    #The logic of the loop below is the following. I am calculating the probability of having 1 repetition of the weapon or spell succesful (say 1 eldirch blast ray) times the damage that the weapon will do plus the probability of having two repetitions succesfull times twice the damage etc.
+    #Now, if there is a bonus added to the odd numbered repetitions only (say when I use weapons with two hands), then this should be multiplied with a index_repetitions*oddbonus*2/repetitions
     while index_repetitions < (repetitions+1):
-        total_damage+=scipy.stats.binom.pmf(index_repetitions,repetitions,p_hit)*index_repetitions*(average_damage_per_hit)+scipy.stats.binom.pmf(index_repetitions,repetitions,p_crit_hit)*index_repetitions*(average_damage_per_hit)
+        total_damage+=scipy.stats.binom.pmf(index_repetitions,repetitions,p_hit)*index_repetitions*(average_damage_per_hit+2*oddbonus/repetitions)+scipy.stats.binom.pmf(index_repetitions,repetitions,p_crit_hit)*index_repetitions*(average_damage_per_hit+2*oddbonus/repetitions)
         index_repetitions += 1
     total_damage=round(total_damage,5)
     return total_damage
+
+    #TotalDamage= (WeaponAverageDamage+Smite+BonusSmite+HexAverageDamage+oddbonous/2)*PrHitAd+ (WeaponAverageDamage+Smite+BonusSmite+HexAverageDamage+oddbonous/2) *CrititA
