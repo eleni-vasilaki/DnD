@@ -34,14 +34,7 @@ class Character:
         #calcuate probability of critical hit
         __critit=1/20*(1-hexblade_curse)+2/20*hexblade_curse  
         p=advantage+luck_point+advantage*elven_accuracy+1
-        self.critit=round(1-(1-__critit)**p,5)
-
-
-    def set_hex(self,hex=0):
-        hex=(hex==1)
-        self.hex=3.5*hex
-
-        
+        self.critit=round(1-(1-__critit)**p,5)   
 
     def set_eldrich_blast(self,eb=0,max_eb_dice=0,agonising_eb=0,eb_bonus=0):
         import math
@@ -54,6 +47,14 @@ class Character:
         self.eldrich_blast_mean_damage=eb*(mean(range(1,max_eb_dice+1,1))+self.modifier[self.ability.index("CHA")]*agonising_eb)
         self.eldirch_blast_hit=eb*(self.modifier[self.ability.index("CHA")]+self.proficiency_bonus+self.eldrich_blast_hit_bonus)
     
+    def set_hex_spell(self,hex_spell=0):
+        hex_spell=(hex_spell==1)
+        self.hex=3.5*hex_spell
+    
+    def set_spirit_shroud_spell(self,spirit_shroud_spell=0):
+        spirit_shroud_spell=(spirit_shroud_spell==1)
+        self.spirit_shroud=4.5*spirit_shroud_spell
+
 
     def hit_opponent_probability(self,opponent_AC=1,modifiers=0):
         p_miss= min(max((opponent_AC-modifiers-1),1),19)/20
