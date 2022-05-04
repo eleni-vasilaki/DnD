@@ -5,6 +5,7 @@ class Character:
     def __init__(self,str,dex,con,int,wis,cha):
         import numpy as np
         self.ability_score= np.array([str,dex,con,int,wis,cha])
+        self.ability=['STR', 'DEX', 'CON','INT','WIS', 'CHA']
         self.modifier = np.floor((self.ability_score - 10)/2)
     
     def set_level(self,char_level=1):
@@ -12,9 +13,11 @@ class Character:
         self.level=char_level
         self.proficiency_bonus=1+np.ceil(char_level/4)
 
-    def return_ability_score(self,ability_name):
-        self.ability=['STR', 'DEX', 'CON','INT','WIS', 'CHA']
+    def get_ability_score(self,ability_name):
         return(self.ability_score[self.ability.index(ability_name)])
+
+    def get_ability_modifier(self,ability_name):
+        return(self.modifier[self.ability.index(ability_name)])
 
     def set_other_bonus(self,ob=0):
         self.other_bonus=ob
@@ -36,16 +39,16 @@ class Character:
         p=advantage+luck_point+advantage*elven_accuracy+1
         self.critit=round(1-(1-__critit)**p,5)   
 
-    def set_eldrich_blast(self,eb=0,max_eb_dice=0,agonising_eb=0,eb_bonus=0):
+    def set_eldritch_blast_spell(self,eb=0,max_eb_dice=0,agonising_eb=0,eb_bonus=0):
         import math
         from statistics import mean
         eb=(eb==1)
         #if eb=0 everything else should be 0
-        self.eldrich_blast=eb
-        self.eldrich_blast_beams=eb*min(math.floor(self.level/5)+1,4)
-        self.eldrich_blast_hit_bonus=eb*eb_bonus #example rod of pact keeper
-        self.eldrich_blast_mean_damage=eb*(mean(range(1,max_eb_dice+1,1))+self.modifier[self.ability.index("CHA")]*agonising_eb)
-        self.eldirch_blast_hit=eb*(self.modifier[self.ability.index("CHA")]+self.proficiency_bonus+self.eldrich_blast_hit_bonus)
+        self.eldritch_blast=eb
+        self.eldritch_blast_beams=eb*min(math.floor(self.level/5)+1,4)
+        self.eldritch_blast_hit_bonus=eb*eb_bonus #example rod of pact keeper
+        self.eldritch_blast_mean_damage=eb*(mean(range(1,max_eb_dice+1,1))+self.modifier[self.ability.index("CHA")]*agonising_eb)
+        self.eldritch_blast_hit=eb*(self.modifier[self.ability.index("CHA")]+self.proficiency_bonus+self.eldritch_blast_hit_bonus)
     
     def set_hex_spell(self,hex_spell=0):
         hex_spell=(hex_spell==1)
@@ -134,3 +137,4 @@ def average_damage(repetitions,average_damage_per_hit,opponent_AC,modifiers,adva
         index_repetitions += 1
     total_damage=round(total_damage,5)
     return total_damage
+
