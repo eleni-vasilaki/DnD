@@ -47,7 +47,8 @@ class Character:
         self.eldritch_blast=eb
         self.eldritch_blast_beams=eb*min(math.floor(self.level/5)+1,4)
         self.eldritch_blast_hit_bonus=eb*eb_bonus #example rod of pact keeper
-        self.eldritch_blast_mean_damage=eb*(mean(range(1,max_eb_dice+1,1))+self.modifier[self.ability.index("CHA")]*agonising_eb)
+        self.eldritch_blast_mean_damage=eb*(mean(range(1,max_eb_dice+1,1)));
+        self.eldritch_blast_damage_modifier=eb*self.modifier[self.ability.index("CHA")]*agonising_eb;
         self.eldritch_blast_hit=eb*(self.modifier[self.ability.index("CHA")]+self.proficiency_bonus+self.eldritch_blast_hit_bonus)
     
     def set_hex_spell(self,hex_spell=0):
@@ -66,7 +67,7 @@ class Character:
         p_hit=round(p_hit,5)
         return p_hit
 
-    def total_average_damage(self,opponent_AC=1,modifiers=0,repetitions=1,average_damage_per_hit=0):
+    def total_average_damage(self,opponent_AC=1,modifiers=0,repetitions=1,average_damage_per_hit=0,damage_modifiers=0):
         import scipy.stats
         total_damage=0
         index_repetitions = 1
@@ -74,7 +75,7 @@ class Character:
         p_crit_hit=self.critit 
         #The logic of the loop below is the following. I am calculating the probability of having 1 repetition of the weapon or spell succesful (say 1 eldirch blast ray) times the damage that the weapon will do plus the probability of having two repetitions succesfull times twice the damage etc.
         while index_repetitions < (repetitions+1):
-              total_damage+=scipy.stats.binom.pmf(index_repetitions,repetitions,p_hit)*index_repetitions*average_damage_per_hit+scipy.stats.binom.pmf(index_repetitions,repetitions,p_crit_hit)*index_repetitions*average_damage_per_hit
+              total_damage+=scipy.stats.binom.pmf(index_repetitions,repetitions,p_hit)*index_repetitions*(average_damage_per_hit+damage_modifiers)+scipy.stats.binom.pmf(index_repetitions,repetitions,p_crit_hit)*index_repetitions*average_damage_per_hit
               index_repetitions += 1
         total_damage=round(total_damage,5)
         return total_damage
@@ -119,13 +120,14 @@ def probability_of__hitting_opponent(opponent_AC,modifiers,advantage,luck_point,
     p_hit=round(p_hit,5)
     return p_hit
 
-def average_damage(repetitions,average_damage_per_hit,opponent_AC,modifiers,advantage,luck_point,elven_accuracy,hexblade_curse):
+def average_damage(repetitions,average_damage_per_hit,damage_modifiers,opponent_AC,modifiers,advantage,luck_point,elven_accuracy,hexblade_curse):
     #repetitions and average damage have to be positive. Repetitions must be an integer >0. During checks repetitions get rounded and become 1 if negative value is given. average_damage_per_hit becomes 0 if negative.
     #TotalDamage= (WeaponAverageDamage+Smite+BonusSmite+HexAverageDamage+oddbonous/2)*PrHitAd+ (WeaponAverageDamage+Smite+BonusSmite+HexAverageDamage+oddbonous/2) *CrititA
     
     #checks
     repetitions=round(repetitions*(repetitions>0)+1*(repetitions<=0))
     average_damage_per_hit=(average_damage_per_hit*(average_damage_per_hit>0))
+    damage_modifiers=(damage_modifiers*(damage_modifiers>0))
 
     total_damage=0
     index_repetitions = 1
@@ -133,7 +135,7 @@ def average_damage(repetitions,average_damage_per_hit,opponent_AC,modifiers,adva
     p_crit_hit= probability_of_crtical_hit(advantage,luck_point,elven_accuracy,hexblade_curse)
     #The logic of the loop below is the following. I am calculating the probability of having 1 repetition of the weapon or spell succesful (say 1 eldirch blast ray) times the damage that the weapon will do plus the probability of having two repetitions succesfull times twice the damage etc.
     while index_repetitions < (repetitions+1):
-        total_damage+=scipy.stats.binom.pmf(index_repetitions,repetitions,p_hit)*index_repetitions*average_damage_per_hit+scipy.stats.binom.pmf(index_repetitions,repetitions,p_crit_hit)*index_repetitions*average_damage_per_hit
+        total_damage+=scipy.stats.binom.pmf(index_repetitions,repetitions,p_hit)*index_repetitions*(average_damage_per_hit+damage_modifiers)+scipy.stats.binom.pmf(index_repetitions,repetitions,p_crit_hit)*index_repetitions*average_damage_per_hit
         index_repetitions += 1
     total_damage=round(total_damage,5)
     return total_damage
