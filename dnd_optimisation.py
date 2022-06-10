@@ -53,19 +53,49 @@ class Character:
     
     def set_hex_spell(self,hex_spell=0):
         hex_spell=(hex_spell==1)
+        self.hex_spell=hex_spell
         self.hex=3.5*hex_spell
     
     def set_spirit_shroud_spell(self,spirit_shroud_spell=0):
         spirit_shroud_spell=(spirit_shroud_spell==1)
+        self.spirit_shroud_spell=spirit_shroud_spell
         self.spirit_shroud=4.5*spirit_shroud_spell
 
+    def set_chromatic_orb_spell(self,chromatic_orb_spell=0,ability="CHA",spell_slot_level=1):
+        chromatic_orb_spell=(chromatic_orb_spell==1)
+        self.chromatic_orb_spell=chromatic_orb_spell
+        self.chromatic_orb_hit=chromatic_orb_spell*(self.modifier[self.ability.index(ability)]+self.proficiency_bonus)
+        self.chromatic_orb_damage=chromatic_orb_spell*(3*4.5+(spell_slot_level-1)*4.5)
 
+    def set_weapon(self,ability="STR",hit_bonus=0,average_damage=0,damage_modifiers=0):
+        from statistics import mean
+        self.weapon_hit=(self.modifier[self.ability.index(ability)]+self.proficiency_bonus)+hit_bonus
+        self.weapon_average_damage=average_damage
+        self.weapon_damage_modifiers=damage_modifiers
+        self.weapon_total_average_damage=average_damage+damage_modifiers
+
+
+    def set_probability_of_successful_casting(self,target=14,saving_throw_modifier=0):
+        self.probability_of_successful_casting=(target-1-saving_throw_modifier)/20;
+    
     def hit_opponent_probability(self,opponent_AC=1,modifiers=0):
         p_miss= min(max((opponent_AC-modifiers-1),1),19)/20
         p=self.advantage+self.luck_point+self.advantage*self.elven_accuracy+1
         p_hit=round(1-(p_miss)**p,5)
         p_hit=round(p_hit,5)
         return p_hit
+
+    def total_average_damage_critical(self,opponent_AC=1,modifiers=0,repetitions=1,average_damage_per_hit=0,damage_modifiers=0):
+        import scipy.stats
+        total_damage=0
+        index_repetitions = 1
+        p_hit=self.hit_opponent_probability(opponent_AC,modifiers)
+        #The logic of the loop below is the following. I am calculating the probability of having 1 repetition of the weapon or spell succesful (say 1 eldirch blast ray) times the damage that the weapon will do plus the probability of having two repetitions succesfull times twice the damage etc.
+        while index_repetitions < (repetitions+1):
+              total_damage+=scipy.stats.binom.pmf(index_repetitions,repetitions,p_hit)*index_repetitions*(2*average_damage_per_hit+damage_modifiers)
+              index_repetitions += 1
+        total_damage_critical_hit=round(total_damage,5)
+        return total_damage_critical_hit
 
     def total_average_damage(self,opponent_AC=1,modifiers=0,repetitions=1,average_damage_per_hit=0,damage_modifiers=0):
         import scipy.stats
@@ -79,6 +109,8 @@ class Character:
               index_repetitions += 1
         total_damage=round(total_damage,5)
         return total_damage
+
+
 
 
 
