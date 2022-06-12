@@ -87,6 +87,10 @@ class Character:
 
     def total_average_damage_critical(self,opponent_AC=1,modifiers=0,repetitions=1,average_damage_per_hit=0,damage_modifiers=0):
         import scipy.stats
+        
+        #minimum number of repetitions is 1
+        repetitions=(repetitions<1)+repetitions
+        
         total_damage=0
         index_repetitions = 1
         p_hit=self.hit_opponent_probability(opponent_AC,modifiers)
@@ -99,6 +103,10 @@ class Character:
 
     def total_average_damage(self,opponent_AC=1,modifiers=0,repetitions=1,average_damage_per_hit=0,damage_modifiers=0):
         import scipy.stats
+        
+        #minimum number of repetitions is 1
+        repetitions=(repetitions<1)+repetitions
+        
         total_damage=0
         index_repetitions = 1
         p_hit=self.hit_opponent_probability(opponent_AC,modifiers)
