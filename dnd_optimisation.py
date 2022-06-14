@@ -67,17 +67,20 @@ class Character:
         self.chromatic_orb_hit=chromatic_orb_spell*(self.modifier[self.ability.index(ability)]+self.proficiency_bonus)
         self.chromatic_orb_damage=chromatic_orb_spell*(3*4.5+(spell_slot_level-1)*4.5)
 
-    def set_weapon(self,ability="STR",hit_bonus=0,average_damage=0,damage_modifiers=0):
+    def set_weapon(self,ability="STR",hit_bonus=0,average_damage_dice=0,damage_modifiers=0):
         from statistics import mean
         self.weapon_hit=(self.modifier[self.ability.index(ability)]+self.proficiency_bonus)+hit_bonus
-        self.weapon_average_damage=average_damage
+        self.weapon_average_damage_dice=average_damage_dice
         self.weapon_damage_modifiers=damage_modifiers
-        self.weapon_total_average_damage=average_damage+damage_modifiers
+        self.weapon_total_average_damage=average_damage_dice+damage_modifiers
 
 
-    def set_probability_of_successful_casting(self,target=14,saving_throw_modifier=0):
-        self.probability_of_successful_casting=(target-1-saving_throw_modifier)/20;
-    
+    def set_probability_of_successful_casting(self,target=14,saving_throw_modifier=0,disadvantage=0):
+        disadvantage=(disadvantage==1)
+        p_oponent__one_roll_failure=(target-1-saving_throw_modifier)/20 
+        self.probability_of_successful_casting=p_oponent__one_roll_failure+disadvantage*p_oponent__one_roll_failure*(1-p_oponent__one_roll_failure)
+       
+ 
     def hit_opponent_probability(self,opponent_AC=1,modifiers=0):
         p_miss= min(max((opponent_AC-modifiers-1),1),19)/20
         p=self.advantage+self.luck_point+self.advantage*self.elven_accuracy+1
@@ -87,9 +90,8 @@ class Character:
 
     def total_average_damage_critical(self,opponent_AC=1,modifiers=0,repetitions=1,average_damage_per_hit=0,damage_modifiers=0):
         import scipy.stats
-        
         #minimum number of repetitions is 1
-        repetitions=(repetitions<1)+repetitions
+        repetitions=(repetitions<1)+repetitions*(repetitions>=1)
         
         total_damage=0
         index_repetitions = 1
@@ -105,7 +107,7 @@ class Character:
         import scipy.stats
         
         #minimum number of repetitions is 1
-        repetitions=(repetitions<1)+repetitions
+        repetitions=(repetitions<1)+repetitions*(repetitions>=1)
         
         total_damage=0
         index_repetitions = 1
@@ -117,7 +119,11 @@ class Character:
               index_repetitions += 1
         total_damage=round(total_damage,5)
         return total_damage
+       
+       
 
+def d(dice_max=4):
+        return 0.5*(dice_max-1)+1
 
 
 
